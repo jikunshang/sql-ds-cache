@@ -503,5 +503,5 @@ object ParquetFileFormat extends Logging {
             s"Parquet key-value metadata:\n\t$schemaString", cause)
         Failure(cause)
     }.toOption
-  }
+
 }

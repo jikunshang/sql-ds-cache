@@ -670,5 +670,5 @@ void Reader::setPlasmaCacheRedis(std::string host, int port, std::string passwor
     plasmaCacheManager->setCacheRedis(options);
   }
 }
-
+}
 }  // namespace ape
