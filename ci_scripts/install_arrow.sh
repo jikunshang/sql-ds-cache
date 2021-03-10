@@ -28,14 +28,14 @@ sudo apt-get install -y -q --no-install-recommends \
         protobuf-compiler \
         rapidjson-dev \
         tzdata && \
-        apt-get clean && \
-        rm -rf /var/lib/apt/lists*
+        sudo apt-get clean && \
+        sudo rm -rf /var/lib/apt/lists*
 
 cd /tmp
 git clone https://github.com/oap-project/arrow.git
 cd arrow
 BRANCH=ape-dev
-git checkout %BRANCH
+git checkout $BRANCH
 
 cd cpp
 mkdir build
