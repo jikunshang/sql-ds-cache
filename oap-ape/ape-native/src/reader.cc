@@ -118,10 +118,12 @@ void Reader::convertSchema(std::string requiredColumnName) {
   for (int i = 0; i < filedsNum; i++) {
     std::string columnName = j["fields"][i]["name"];
     int columnIndex = fileMetaData->schema()->ColumnIndex(columnName);
-    requiredColumnIndex.push_back(columnIndex);
-    schema.push_back(
-        Schema(columnName, fileMetaData->schema()->Column(columnIndex)->physical_type()));
-    requiredColumnNames.push_back(columnName);
+    if (columnIndex >= 0) {
+      requiredColumnIndex.push_back(columnIndex);
+      schema.push_back(
+          Schema(columnName, fileMetaData->schema()->Column(columnIndex)->physical_type()));
+      requiredColumnNames.push_back(columnName);
+    }
   }
 }
 
@@ -316,9 +318,9 @@ int Reader::readBatch(int batchSize, long* buffersPtr_, long* nullsPtr_) {
       auto agg = aggExprs[i];
       if (typeid(*agg) == typeid(RootAggExpression)) {
         rowsRet =
-            agg->ExecuteWithParam(rowsToRead, buffersPtr, nullsPtr, nullptr);
+            agg->ExecuteWithParam(rowsRet, buffersPtr, nullsPtr, nullptr); // emmm it will always be 0.
         auto result = std::dynamic_pointer_cast<RootAggExpression>(agg)->getResult();
-        if (result.size() == 1) {
+        if (result.size() == 1) {   // for aggregation with group by, it could be more than 1 result row.
           aggResults[i].push_back(result[0]);
         } else {
           ARROW_LOG(DEBUG) << "Oops... why return " << result.size() << " results";
@@ -339,8 +341,8 @@ int Reader::readBatch(int batchSize, long* buffersPtr_, long* nullsPtr_) {
     delete[] nullsPtr;
   }
 
-  ARROW_LOG(DEBUG) << "ret rows " << rowsRet;
-  return rowsRet;
+  ARROW_LOG(DEBUG) << "ret rows " << aggResults.size();
+  return aggResults.size();
 }
 
 bool Reader::hasNext() { return columnReaders[0]->HasNext(); }
@@ -387,6 +389,7 @@ void Reader::checkEndOfRowGroup() {
   }
 
   for (int i = 0; i < requiredColumnIndex.size(); i++) {
+    ARROW_LOG(INFO) << "column index "<< requiredColumnIndex[i];
     columnReaders[i] = rowGroupReader->Column(requiredColumnIndex[i]);
   }
 
