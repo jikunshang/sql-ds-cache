@@ -42,6 +42,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                  EXCLUDE_FROM_ALL)
 
 set(CMAKE_CXX_STANDARD 17)
+# find_library(ARROW_LIB arrow)
 
 add_executable(convertorTest convertorTest.cc)
 target_link_libraries(convertorTest gtest_main parse)
@@ -58,6 +59,10 @@ add_test(NAME aggParserTest COMMAND ${EXECUTABLE_OUTPUT_PATH}/aggParserTest)
 add_executable(apeHashMapTest apeHashMapTest.cc)
 target_link_libraries(apeHashMapTest gtest_main parquet_jni )
 add_test(NAME apeHashMapTest COMMAND ${EXECUTABLE_OUTPUT_PATH}/apeHashMapTest)
+
+add_executable(arrowComputeTest arrowComputeTest.cc)
+target_link_libraries(arrowComputeTest gtest_main ${ARROW_LIB})
+add_test(NAME arrowComputeTest COMMAND ${EXECUTABLE_OUTPUT_PATH}/arrowComputeTest)
 
 # these test works well on my dev machine, but it will fail on ci env
 # because it have hdfs dependency, so I will disable it. You can enable 
